@@ -9,6 +9,7 @@ public class VideoHandler : MonoBehaviour
     public RawImage videoScreen;
     public VideoPlayer videoPlayer;
 
+
     void Start()
     {
         StartCoroutine(PrepareVideo());
@@ -31,17 +32,15 @@ public class VideoHandler : MonoBehaviour
     // 비디오 재생
     public void StartVideo(string clipName)
     {
-        videoScreen.texture = null;
-        Debug.Log(Resources.Load<VideoClip>("Clips/" + clipName));
 
         // 비디오 클립 설정
         videoPlayer.clip = Resources.Load<VideoClip>("Clips/" + clipName);
-              
+
         if (videoPlayer != null && videoPlayer.isPrepared)
         {
             videoPlayer.Play();
         }
-
+        
     }
 
 }

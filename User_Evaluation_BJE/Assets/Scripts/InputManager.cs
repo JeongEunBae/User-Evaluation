@@ -8,12 +8,23 @@ public class InputManager : MonoBehaviour
 {
     /* Emotion Button */
     public GameObject[] emotionButton;
-    public int currentSelectedEmotion;
     public ProgramManager programManager;
+
+    /* Error Button */
+    public GameObject errorButton;
+
+    /* Record */
+    public int currentSelectedEmotion; // 사용자가 선택한 감정 기록
+    public int replayTime; // replay를 한 횟수
+    public float taskTime; // 하나의 감정을 평가하는 시간 (비디오 영상 시간 포함)
+    public int error; // 애니메이션 Error (0, 1[에러])
 
     private void Start()
     {
         currentSelectedEmotion = 0;
+        replayTime = 0;
+        taskTime = 0f;
+        error = 0;
     }
 
     private void Update()
@@ -32,6 +43,8 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.Space)) FuncButtonPressed("Next");
         if(Input.GetKeyDown(KeyCode.R)) FuncButtonPressed("Replay");
         
+        // Task Time
+        taskTime += Time.deltaTime;
     }
 
     //  No.1 ~ No.7 버튼 선택
@@ -41,7 +54,44 @@ public class InputManager : MonoBehaviour
         {
             if(emotionButton[index] == EventSystem.current.currentSelectedGameObject) EmotionButtonPressed(index + 1);
         }
-            
+
+        // Highlighted Color 원래 색상으로 초기화 
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    public void OnClickReplayButton()
+    {
+        FuncButtonPressed("Replay");
+
+        // Highlighted Color 원래 색상으로 초기화
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    public void OnClickNextButton()
+    {
+        FuncButtonPressed("Next");
+
+        // Highlighted Color 원래 색상으로 초기화
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    // Error 버튼 클릭 시 error = 1, 한번 더 클릭 시(error=1일때) error = 0
+    public void onClickErrorButton()
+    {
+        if(error == 0)
+        {
+            error = 1;
+            errorButton.transform.Find("Select").transform.Find("Check").GetComponent<RawImage>().color = new Color(1f, 0.0f, 0.0f);
+        }
+        else
+        {
+            error = 0;
+            errorButton.transform.Find("Select").transform.Find("Check").GetComponent<RawImage>().color = new Color(0.6f, 0.6f, 0.6f);
+        }
+        
+
+        // Highlighted Color 원래 색상으로 초기화
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     // 선택된 Emotion 버튼 색 변경
@@ -57,10 +107,43 @@ public class InputManager : MonoBehaviour
 
     }
 
+    // Emotion 버튼 초기화
+    public void EmotionButtonUnChecked()
+    {
+        foreach (var button in emotionButton)
+        {
+            button.transform.Find("Select").transform.Find("Check").GetComponent<RawImage>().color = new Color(0.6f, 0.6f, 0.6f);
+        }
+
+    }
+
     public void FuncButtonPressed(string funcCode)
     {
-        if(funcCode == "Next") programManager.NextVideo();
-        else if(funcCode == "Replay") programManager.PlayVideo();
+        if (funcCode == "Next")
+        {
+            // 동영상이 play 되고 있을 경우에는 넘어갈 수 없음
+            if (!programManager.taskPanel.GetComponent<VideoHandler>().videoPlayer.isPlaying)
+            {
+                // error가 없고 선택한 감정이 없을 경우에는 넘어갈 수 없음
+                if (error == 0 && currentSelectedEmotion == 0) return;
+
+                EmotionButtonUnChecked();
+                programManager.NextVideo();
+
+                replayTime = 0;
+                taskTime = 0;
+                error = 0;
+                currentSelectedEmotion = 0;
+
+                // errorButton 초기화
+                errorButton.transform.Find("Select").transform.Find("Check").GetComponent<RawImage>().color = new Color(0.6f, 0.6f, 0.6f);
+            }
+        }
+        else if (funcCode == "Replay")
+        {
+            replayTime++;
+            programManager.PlayVideo();
+        }
     }
 
 }
