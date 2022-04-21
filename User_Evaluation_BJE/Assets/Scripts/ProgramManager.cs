@@ -275,7 +275,7 @@ public class ProgramManager : MonoBehaviour
                 answerSuccessCount = 0;
                 totalTaskTime = 0;
 
-                streamWriter.WriteLine("anime_index,answer,task_time,ReplayTimes,error,count");
+                streamWriter.WriteLine("anime_index,answer,task_time,replay_time,error,count");
 
                 int saveLength = answerSelectedEmotionList.Count;
                 for (int index = 0; index < saveLength; index++)
