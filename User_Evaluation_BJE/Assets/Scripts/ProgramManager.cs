@@ -47,7 +47,7 @@ public class ProgramManager : MonoBehaviour
     private void Start()
     {
         currentTaskNum = 1;
-        videoTaskNum = 5;
+        videoTaskNum = 406;
 
         answerSelectedEmotionList = new List<int>();
         replayTimeList = new List<int>();
@@ -188,37 +188,6 @@ public class ProgramManager : MonoBehaviour
         }
     }
 
-    // 피험자 답안 저장 기록
-    private void SaveExpTaskAnswer(bool isError = false)
-    {
-        string answer_path = p_Dir + "\\" + "Data" + currentTaskNum + ".csv";
-        if(isError) answer_path = p_Dir + "\\" + "Dataerr" + currentTaskNum + ".csv";
-        using (FileStream fileStream = new FileStream(answer_path, FileMode.OpenOrCreate))
-        {
-            using (StreamWriter streamWriter = new StreamWriter(fileStream, System.Text.Encoding.UTF8))
-            {
-                answerSuccessCount = 0;
-                totalTaskTime = 0;
-                
-                streamWriter.WriteLine("anime_index,answer,task_time,ReplayTimes,error,count");
-
-                int saveLength = answerSelectedEmotionList.Count;
-                for (int index = 0; index < saveLength; index++)
-                {
-                    streamWriter.WriteLine(videoList[((currentTaskNum - 1) * videoTaskNum) + index].Remove(videoList[((currentTaskNum - 1) * videoTaskNum) + index].Length - 1) + "," + answerSelectedEmotionList[index] + "," + taskTimeList[index] + "," + replayTimeList[index] + "," + errorList[index]);
-                    if(answerSelectedEmotionList[index] == Int32.Parse(solutionList[((currentTaskNum - 1) * videoTaskNum) + index].Remove(solutionList[((currentTaskNum - 1) * videoTaskNum) + index].Length - 1))) answerSuccessCount++;
-                    totalTaskTime += taskTimeList[index];
-                }
-                streamWriter.WriteLine(" , , , , ," + answerSuccessCount);
-            }
-        }
-    }
-
-    private void OnApplicationQuit()
-    {
-        SaveExpTaskAnswer(true);
-    }
-
     private void GetVideoAndSolutionList()
     {
         // 비디오 리스트 가져오기
@@ -257,27 +226,9 @@ public class ProgramManager : MonoBehaviour
         taskPanel.GetComponent<VideoHandler>().StartVideo(videoList[videoIndex].Remove(videoList[videoIndex].Length - 1));
     }
 
-    private void RecordAnswer()
-    {
-        // 정답 기록 
-        answerSelectedEmotionList.Add(taskPanel.GetComponent<InputManager>().currentSelectedEmotion); // 사용자가 선택한 Emotion
-        replayTimeList.Add(taskPanel.GetComponent<InputManager>().replayTime); // replay를 한 횟수
-        taskTimeList.Add(taskPanel.GetComponent<InputManager>().taskTime); // 하나의 감정을 평가하는 시간 (비디오 영상 시간 포함)
-        errorList.Add(taskPanel.GetComponent<InputManager>().error); // 애니메이션 에러 0(정상), 1(에러)
-    }
-
-    private void ClearRecordAnswerList()
-    {
-        // List 초기화
-        answerSelectedEmotionList.Clear();
-        replayTimeList.Clear();
-        taskTimeList.Clear();
-        errorList.Clear();
-    }
-
     public void NextVideo()
     {
-        
+
         RecordAnswer();
 
         videoIndex++;
@@ -312,6 +263,55 @@ public class ProgramManager : MonoBehaviour
         }
     }
 
+    // 피험자 답안 저장 기록
+    private void SaveExpTaskAnswer(bool isError = false)
+    {
+        string answer_path = p_Dir + "\\" + "Data" + currentTaskNum + ".csv";
+        if (isError) answer_path = p_Dir + "\\" + "Dataerr" + currentTaskNum + ".csv";
+        using (FileStream fileStream = new FileStream(answer_path, FileMode.OpenOrCreate))
+        {
+            using (StreamWriter streamWriter = new StreamWriter(fileStream, System.Text.Encoding.UTF8))
+            {
+                answerSuccessCount = 0;
+                totalTaskTime = 0;
+
+                streamWriter.WriteLine("anime_index,answer,task_time,ReplayTimes,error,count");
+
+                int saveLength = answerSelectedEmotionList.Count;
+                for (int index = 0; index < saveLength; index++)
+                {
+                    streamWriter.WriteLine(videoList[((currentTaskNum - 1) * videoTaskNum) + index].Remove(videoList[((currentTaskNum - 1) * videoTaskNum) + index].Length - 1) + "," + answerSelectedEmotionList[index] + "," + taskTimeList[index] + "," + replayTimeList[index] + "," + errorList[index]);
+                    if (answerSelectedEmotionList[index] == Int32.Parse(solutionList[((currentTaskNum - 1) * videoTaskNum) + index].Remove(solutionList[((currentTaskNum - 1) * videoTaskNum) + index].Length - 1))) answerSuccessCount++;
+                    totalTaskTime += taskTimeList[index];
+                }
+                streamWriter.WriteLine(" , , , , ," + answerSuccessCount);
+            }
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveExpTaskAnswer(true);
+    }
+
+    private void RecordAnswer()
+    {
+        // 정답 기록 
+        answerSelectedEmotionList.Add(taskPanel.GetComponent<InputManager>().currentSelectedEmotion); // 사용자가 선택한 Emotion
+        replayTimeList.Add(taskPanel.GetComponent<InputManager>().replayTime); // replay를 한 횟수
+        taskTimeList.Add(taskPanel.GetComponent<InputManager>().taskTime); // 하나의 감정을 평가하는 시간 (비디오 영상 시간 포함)
+        errorList.Add(taskPanel.GetComponent<InputManager>().error); // 애니메이션 에러 0(정상), 1(에러)
+    }
+
+    private void ClearRecordAnswerList()
+    {
+        // List 초기화
+        answerSelectedEmotionList.Clear();
+        replayTimeList.Clear();
+        taskTimeList.Clear();
+        errorList.Clear();
+    }
+
     public void SetProgress()
     {
         progressText.text = (++currentVideoNum) + " / " + videoTaskNum;
@@ -326,7 +326,5 @@ public class ProgramManager : MonoBehaviour
             progressSlider.value = Convert.ToSingle(Math.Round(taskPanel.GetComponent<VideoHandler>().videoPlayer.time, 3) / Math.Round(taskPanel.GetComponent<VideoHandler>().videoPlayer.clip.length, 3));
         }
         else progressSlider.value = 1.0f;
-
-        
     }
 }
