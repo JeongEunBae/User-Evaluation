@@ -12,19 +12,19 @@
    
    - Video 파일은 Assets/Resources/Clips 폴더 위치 내에 존재하면 됩니다.
      
-     <img src="./README_IMG/1.png">
+     <img src="./README_IMG/1.jpg">
 
 2. <b>Video 파일 List, Solution 파일 위치 설정</b>
    
    - Assets/Resources/Files 폴더 위치 내에 존재하면 됩니다.
      
-     <img src="./README_IMG/2.png">
+     <img src="./README_IMG/2.jpg">
 
 #### :arrow_forward: Output 파일
 
 > Output 파일 위치  : ``Desktop/Data/<피험자ID>/``
 
-<img src="./README_IMG/3.png">
+<img src="./README_IMG/3.jpg">
 
 1. **Data<Task번호>.csv**
    
